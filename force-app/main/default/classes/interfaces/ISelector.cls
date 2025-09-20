@@ -1,0 +1,1 @@
+// ISelector interface

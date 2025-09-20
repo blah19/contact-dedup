@@ -1,3 +1,27 @@
+/**
+ * Service for in-memory candidate duplicate matching and scoring for Customer__c records.
+ * <p>
+ * Usage:
+ * - Uses dependency-injected loader and saver for all SOQL/DML (mockable via @TestVisible fields).
+ * - Reads customers via loader, builds buckets by email, phone, and lastName+phone.
+ * - For each bucket with 2+ customers, generates unordered pairs (minId, maxId).
+ * - Scores pairs:
+ *   - 100: same Email__c
+ *   - 70: same Phone_Normalized__c AND fuzzy first names (edit distance ≤1 after lower/trim)
+ *   - 50: same LastName__c AND same Phone_Normalized__c
+ *   - Keeps max score per pair.
+ * - Materializes Duplicate_Match__c rows with Status__c='Pending Review' and bulk-inserts via saver.
+ * - Returns count of successful inserts.
+ * <p>
+ * Methods:
+ * - runAndSavePending(): runs matching for all customers.
+ * - runAndSavePending(Set<Id>): runs matching for a subset (chunked for bulk safety).
+ * <p>
+ * Rules:
+ * - No SOQL/DML in service; all data access via loader/saver.
+ * - Skips null/blank keys and self-pairs; deterministic pair order by Id.
+ * - Single bulk insert per run.
+ */
 public with sharing class DuplicateMatchingService {
 	@TestVisible private CustomerLoader customerLoader = new CustomerLoader();
 	@TestVisible private DuplicateMatchSaver duplicateMatchSaver = new DuplicateMatchSaver();
@@ -45,6 +69,7 @@ public with sharing class DuplicateMatchingService {
 
 		// Pair scoring
 		Map<String, Integer> pairScores = new Map<String, Integer>();
+		Map<String, List<Id>> pairIds = new Map<String, List<Id>>();
 		Map<String, Map<String, List<Customer__c>>> buckets = new Map<String, Map<String, List<Customer__c>>>();
 		buckets.put('email', byEmail);
 		buckets.put('phone', byPhone);
@@ -76,6 +101,7 @@ public with sharing class DuplicateMatchingService {
 						}
 						if (!pairScores.containsKey(pairKey) || score > pairScores.get(pairKey)) {
 							pairScores.put(pairKey, score);
+							pairIds.put(pairKey, new List<Id>{minId, maxId});
 						}
 					}
 				}
@@ -86,9 +112,9 @@ public with sharing class DuplicateMatchingService {
 		List<Duplicate_Match__c> matches = new List<Duplicate_Match__c>();
 		for (String pairKey : pairScores.keySet()) {
 			Integer score = pairScores.get(pairKey);
-			if (score > 0) {
-				List<String> ids = pairKey.split('\u007C');
-				matches.add(new Duplicate_Match__c(Customer_A__c = (Id)ids[0], Customer_B__c = (Id)ids[1], Match_Score__c = score, Status__c = 'Pending Review'));
+			if (score > 0 && pairIds.containsKey(pairKey)) {
+				List<Id> ids = pairIds.get(pairKey);
+				matches.add(new Duplicate_Match__c(Customer_A__c = ids[0], Customer_B__c = ids[1], Match_Score__c = score, Status__c = 'Pending Review'));
 			}
 		}
 		List<Database.SaveResult> results = duplicateMatchSaver.insertPending(matches);

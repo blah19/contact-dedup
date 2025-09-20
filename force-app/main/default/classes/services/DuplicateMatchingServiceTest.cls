@@ -1,6 +1,7 @@
 @isTest
 private class DuplicateMatchingServiceTest {
 	@isTest static void test_runAndSavePending_all() {
+			TriggerControl.skipDuplicateMatchTrigger = true;
 		Profile p = [SELECT Id FROM Profile WHERE Name = 'System Administrator' LIMIT 1];
 		User u = new User(
 			Username = 'dedupsvcuser-' + System.currentTimeMillis() + '@example.com',
@@ -36,10 +37,12 @@ private class DuplicateMatchingServiceTest {
 			// Optionally, verify inserted Duplicate_Match__c records
 			List<Duplicate_Match__c> matches = [SELECT Id, Status__c FROM Duplicate_Match__c WHERE Status__c = 'Pending Review'];
 			System.assertEquals(3, matches.size(), 'Should have 3 pending review matches');
+				TriggerControl.skipDuplicateMatchTrigger = false;
 		}
 	}
 
 	@isTest static void test_runAndSavePending_subset() {
+			TriggerControl.skipDuplicateMatchTrigger = true;
 		Profile p = [SELECT Id FROM Profile WHERE Name = 'System Administrator' LIMIT 1];
 		User u = new User(
 			Username = 'dedupsvcuser2-' + System.currentTimeMillis() + '@example.com',
@@ -71,6 +74,7 @@ private class DuplicateMatchingServiceTest {
 			System.assertEquals(1, result, 'Should find and save 1 candidate pair for subset');
 			List<Duplicate_Match__c> matches = [SELECT Id, Status__c FROM Duplicate_Match__c WHERE Status__c = 'Pending Review'];
 			System.assertEquals(1, matches.size(), 'Should have 1 pending review match');
+				TriggerControl.skipDuplicateMatchTrigger = false;
 		}
 	}
 

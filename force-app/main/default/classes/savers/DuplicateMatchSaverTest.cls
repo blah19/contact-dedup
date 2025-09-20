@@ -1,6 +1,7 @@
 @isTest
 public with sharing class DuplicateMatchSaverTest {
 	@isTest static void insertPending_ok() {
+			TriggerControl.skipDuplicateMatchTrigger = true;
 		Profile p = [SELECT Id FROM Profile WHERE Name = 'System Administrator' LIMIT 1];
 		User u = new User(
 			Username = 'dedupuser-' + System.currentTimeMillis() + '@example.com',
@@ -37,6 +38,7 @@ public with sharing class DuplicateMatchSaverTest {
 			for (Duplicate_Match__c dm : persisted) {
 				System.assertEquals('Pending Review', dm.Status__c, 'Status__c should be Pending Review');
 			}
+				TriggerControl.skipDuplicateMatchTrigger = false;
 		}
 	}
 

@@ -2,6 +2,7 @@
 public class CustomerLoaderTest {
 	@isTest
 	static void testCustomerLoaderMethods() {
+        TriggerControl.skipDuplicateMatchTrigger = true;
 		Profile p = [SELECT Id FROM Profile WHERE Name = 'System Administrator' LIMIT 1];
 		User u = new User(
 			Username = 'customerloaderuser-' + System.currentTimeMillis() + '@example.com',
@@ -56,6 +57,7 @@ public class CustomerLoaderTest {
             Set<String> lastNames = new Set<String>{'Smith', 'Jones'};
             List<Customer__c> byLastNames = loader.selectByLastNameIn(lastNames);
             System.assertEquals(3, byLastNames.size(), 'Should return all customers with matching last names');
+            TriggerControl.skipDuplicateMatchTrigger = false;
 		}
 	}
 }

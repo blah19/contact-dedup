@@ -23,9 +23,9 @@ public class DuplicateMatchLoaderTest {
 			Customer__c cB = new Customer__c(FirstName__c='B', Email__c='b@x.com', Phone__c='(222) 222-2222', Phone_Normalized__c='12222222222', SignupDate__c=Date.today(), LastName__c='Beta');
 			insert new List<Customer__c>{cA, cB};
 			// Seed matches
-			Duplicate_Match__c m1 = new Duplicate_Match__c(Customer_A__c=cA.Id, Customer_B__c=cB.Id, Match_Score__c=100, Status__c='Pending Review');
-			Duplicate_Match__c m2 = new Duplicate_Match__c(Customer_A__c=cB.Id, Customer_B__c=cA.Id, Match_Score__c=50, Status__c='Merged');
-			Duplicate_Match__c m3 = new Duplicate_Match__c(Customer_A__c=cA.Id, Customer_B__c=cB.Id, Match_Score__c=70, Status__c='Pending Review');
+            Duplicate_Match__c m1 = new Duplicate_Match__c(Customer_A__c=cA.Id, Customer_B__c=cB.Id, Match_Score__c=100, Status__c='Pending');
+            Duplicate_Match__c m2 = new Duplicate_Match__c(Customer_A__c=cB.Id, Customer_B__c=cA.Id, Match_Score__c=50, Status__c='Merged');
+            Duplicate_Match__c m3 = new Duplicate_Match__c(Customer_A__c=cA.Id, Customer_B__c=cB.Id, Match_Score__c=70, Status__c='Pending');
 			insert new List<Duplicate_Match__c>{m1, m2, m3};
 			DuplicateMatchLoader loader = new DuplicateMatchLoader();
 			// selectByIds

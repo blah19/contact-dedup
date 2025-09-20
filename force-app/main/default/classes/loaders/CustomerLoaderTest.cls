@@ -42,6 +42,20 @@ public class CustomerLoaderTest {
 			System.assertEquals(2, byLastNamePhone.size(), 'Should return customers sharing last name and phone');
 			// Empty results
 			System.assertEquals(0, loader.selectByEmail('notfound@example.com').size(), 'Should return empty for no match');
+            // selectByPhoneNormalizedIn
+            Set<String> phones = new Set<String>{'11234567890', '19998887777'};
+            List<Customer__c> byPhones = loader.selectByPhoneNormalizedIn(phones);
+            System.assertEquals(3, byPhones.size(), 'Should return all customers with matching normalized phones');
+
+            // selectByEmailIn
+            Set<String> emails = new Set<String>{'alice@example.com', 'carol@example.com'};
+            List<Customer__c> byEmails = loader.selectByEmailIn(emails);
+            System.assertEquals(2, byEmails.size(), 'Should return customers with matching emails');
+
+            // selectByLastNameIn
+            Set<String> lastNames = new Set<String>{'Smith', 'Jones'};
+            List<Customer__c> byLastNames = loader.selectByLastNameIn(lastNames);
+            System.assertEquals(3, byLastNames.size(), 'Should return all customers with matching last names');
 		}
 	}
 }

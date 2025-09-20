@@ -1,3 +1,3 @@
 public class TriggerControl {
-    public static Boolean skipDuplicateMatchTrigger = false;
+  public static Boolean skipDuplicateMatchTrigger = false;
 }

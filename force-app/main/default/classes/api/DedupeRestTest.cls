@@ -1,6 +1,6 @@
-@isTest
+@IsTest
 private class DedupeRestTest {
-	static {
-		TriggerControl.skipDuplicateMatchTrigger = true;
-	}
+  static {
+    TriggerControl.skipDuplicateMatchTrigger = true;
+  }
 }

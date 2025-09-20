@@ -1,1 +1,2 @@
-// DuplicateMatchSaver class
+public with sharing class DuplicateMatchSaver implements ISaver {
+}

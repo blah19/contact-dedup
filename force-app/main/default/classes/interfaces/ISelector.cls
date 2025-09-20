@@ -1,1 +1,2 @@
-// ISelector interface
+public interface ISelector {
+}

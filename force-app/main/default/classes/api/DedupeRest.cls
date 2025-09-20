@@ -1,1 +1,2 @@
-// DedupeRest class
+public with sharing class DedupeRest {
+}

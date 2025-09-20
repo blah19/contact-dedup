@@ -1,1 +1,2 @@
-// ISaver interface
+public interface ISaver {
+}

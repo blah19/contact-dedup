@@ -1,1 +1,3 @@
-// DuplicateMatchingServiceTest class
+@isTest
+private class DuplicateMatchingServiceTest {
+}

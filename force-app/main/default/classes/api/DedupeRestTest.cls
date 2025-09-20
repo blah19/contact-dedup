@@ -1,1 +1,3 @@
-// DedupeRestTest class
+@isTest
+private class DedupeRestTest {
+}

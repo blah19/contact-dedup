@@ -1,1 +1,3 @@
-// DuplicateMatchSaverTest class
+@isTest
+private class DuplicateMatchSaverTest {
+}

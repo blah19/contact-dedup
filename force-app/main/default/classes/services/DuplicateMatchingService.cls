@@ -1,1 +1,2 @@
-// DuplicateMatchingService class
+public with sharing class DuplicateMatchingService {
+}

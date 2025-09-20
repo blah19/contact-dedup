@@ -1,1 +1,2 @@
-// ILoader interface
+public interface ILoader {
+}

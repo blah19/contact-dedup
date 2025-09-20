@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Phone_Normalized__c</fullName>
+    <externalId>false</externalId>
+    <label>Phone Normalized</label>
+    <length>15</length>
+    <required>false</required>
+    <type>Text</type>
+    <unique>false</unique>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <inlineHelpText>Digits-only version of phone for duplicate detection.</inlineHelpText>
+</CustomField>

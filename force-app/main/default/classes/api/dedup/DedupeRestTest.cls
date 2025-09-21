@@ -14,7 +14,7 @@ private class DedupeRestTest {
     }
 
     @IsTest
-    static void get_collection_without_expand() {
+    static void whenGetCollectionCalledWithoutExpand_thenReturnsBasicMatchData() {
         RestRequest req = new RestRequest();
         req.requestUri = '/services/apexrest/v1/duplicate-matches';
         req.httpMethod = 'GET';
@@ -33,7 +33,7 @@ private class DedupeRestTest {
     }
 
     @IsTest
-    static void get_collection_with_expand() {
+    static void whenGetCollectionCalledWithExpand_thenReturnsMatchDataWithStructure() {
         RestRequest req = new RestRequest();
         req.requestUri = '/services/apexrest/v1/duplicate-matches?expand=customerA,customerB';
         req.httpMethod = 'GET';
@@ -63,7 +63,7 @@ private class DedupeRestTest {
     }
 
     @IsTest
-    static void get_item_without_expand() {
+    static void whenGetItemCalledWithoutExpand_thenReturnsBasicItemData() {
         Id id0 = [SELECT Id FROM Duplicate_Match__c WHERE Status__c='Pending Review' ORDER BY Match_Score__c DESC LIMIT 1].Id;
 
         RestRequest req1 = new RestRequest();
@@ -82,7 +82,7 @@ private class DedupeRestTest {
     }
 
     @IsTest
-    static void get_item_with_expand() {
+    static void whenGetItemCalledWithExpand_thenReturnsItemDataWithStructure() {
         Id id0 = [SELECT Id FROM Duplicate_Match__c WHERE Status__c='Pending Review' ORDER BY Match_Score__c DESC LIMIT 1].Id;
 
         RestRequest req2 = new RestRequest();
@@ -106,7 +106,7 @@ private class DedupeRestTest {
     }
 
     @IsTest
-    static void patch_merged() {
+    static void whenPatchCalledWithMergedStatus_thenUpdatesStatusToMerged() {
         List<Duplicate_Match__c> ms = [SELECT Id FROM Duplicate_Match__c WHERE Status__c='Pending Review' ORDER BY Match_Score__c DESC LIMIT 1];
 
         RestRequest p1 = new RestRequest();
@@ -127,7 +127,7 @@ private class DedupeRestTest {
     }
 
     @IsTest
-    static void patch_ignored() {
+    static void whenPatchCalledWithIgnoredStatus_thenUpdatesStatusToIgnored() {
         List<Duplicate_Match__c> ms = [SELECT Id FROM Duplicate_Match__c WHERE Status__c='Pending Review' ORDER BY Match_Score__c DESC LIMIT 1];
 
         RestRequest p2 = new RestRequest();
@@ -148,7 +148,7 @@ private class DedupeRestTest {
     }
 
     @IsTest
-    static void error_invalid_status() {
+    static void whenPatchCalledWithInvalidStatus_thenReturns400BadRequest() {
         RestRequest bad = new RestRequest();
         bad.requestUri = '/services/apexrest/v1/duplicate-matches/001000000000000AAA';
         bad.httpMethod = 'PATCH';
@@ -164,7 +164,7 @@ private class DedupeRestTest {
     }
 
     @IsTest
-    static void error_unknown_id() {
+    static void whenGetCalledWithUnknownId_thenReturns404NotFound() {
         RestRequest notFound = new RestRequest();
         notFound.requestUri = '/services/apexrest/v1/duplicate-matches/001000000000000AAA';
         notFound.httpMethod = 'GET';

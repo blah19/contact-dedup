@@ -1,7 +1,11 @@
 @IsTest(isParallel=false)
 public class CustomerLoaderTest {
-  @IsTest
-  static void whenCustomerRecordsSeeded_thenLoaderReturnsExpectedResults() {
+  private static Customer__c customer1;
+  private static Customer__c customer2;
+  private static Customer__c customer3;
+  
+  @TestSetup
+  static void setupTestData() {
     TriggerControl.skipDuplicateMatchTrigger = true;
     Profile p = [
       SELECT Id
@@ -35,7 +39,7 @@ public class CustomerLoaderTest {
     );
     System.runAs(u) {
       // Seed customers
-      Customer__c c1 = new Customer__c(
+      customer1 = new Customer__c(
         FirstName__c = 'Alice',
         LastName__c = 'Smith',
         Email__c = 'alice@example.com',
@@ -43,7 +47,7 @@ public class CustomerLoaderTest {
         Phone_Normalized__c = '11234567890',
         SignupDate__c = Date.today()
       );
-      Customer__c c2 = new Customer__c(
+      customer2 = new Customer__c(
         FirstName__c = 'Bob',
         LastName__c = 'Smith',
         Email__c = 'bob@example.com',
@@ -51,7 +55,7 @@ public class CustomerLoaderTest {
         Phone_Normalized__c = '11234567890',
         SignupDate__c = Date.today()
       );
-      Customer__c c3 = new Customer__c(
+      customer3 = new Customer__c(
         FirstName__c = 'Carol',
         LastName__c = 'Jones',
         Email__c = 'carol@example.com',
@@ -59,71 +63,113 @@ public class CustomerLoaderTest {
         Phone_Normalized__c = '19998887777',
         SignupDate__c = Date.today()
       );
-      insert new List<Customer__c>{ c1, c2, c3 };
-      CustomerLoader loader = new CustomerLoader();
-      // selectAll
-      List<Customer__c> all = loader.selectAll();
-      System.assertEquals(3, all.size(), 'Should return all seeded customers');
-      // selectByIds
-      Set<Id> ids = new Set<Id>{ c1.Id, c3.Id };
-      List<Customer__c> byIds = loader.selectByIds(ids);
-      System.assertEquals(2, byIds.size(), 'Should return customers by Id');
-      // selectByEmail
-      List<Customer__c> byEmail = loader.selectByEmail('alice@example.com');
-      System.assertEquals(1, byEmail.size(), 'Should return customer by email');
-      // selectByPhoneNormalized
-      List<Customer__c> byPhone = loader.selectByPhoneNormalized('11234567890');
-      System.assertEquals(
-        2,
-        byPhone.size(),
-        'Should return customers sharing normalized phone'
-      );
-      // selectByLastNameAndPhoneNormalized
-      List<Customer__c> byLastNamePhone = loader.selectByLastNameAndPhoneNormalized(
-        'Smith',
-        '11234567890'
-      );
-      System.assertEquals(
-        2,
-        byLastNamePhone.size(),
-        'Should return customers sharing last name and phone'
-      );
-      // Empty results
-      System.assertEquals(
-        0,
-        loader.selectByEmail('notfound@example.com').size(),
-        'Should return empty for no match'
-      );
-      // selectByPhoneNormalizedIn
-      Set<String> phones = new Set<String>{ '11234567890', '19998887777' };
-      List<Customer__c> byPhones = loader.selectByPhoneNormalizedIn(phones);
-      System.assertEquals(
-        3,
-        byPhones.size(),
-        'Should return all customers with matching normalized phones'
-      );
-
-      // selectByEmailIn
-      Set<String> emails = new Set<String>{
-        'alice@example.com',
-        'carol@example.com'
-      };
-      List<Customer__c> byEmails = loader.selectByEmailIn(emails);
-      System.assertEquals(
-        2,
-        byEmails.size(),
-        'Should return customers with matching emails'
-      );
-
-      // selectByLastNameIn
-      Set<String> lastNames = new Set<String>{ 'Smith', 'Jones' };
-      List<Customer__c> byLastNames = loader.selectByLastNameIn(lastNames);
-      System.assertEquals(
-        3,
-        byLastNames.size(),
-        'Should return all customers with matching last names'
-      );
-      TriggerControl.skipDuplicateMatchTrigger = false;
+      insert new List<Customer__c>{ customer1, customer2, customer3 };
     }
+    TriggerControl.skipDuplicateMatchTrigger = false;
+  }
+
+  @IsTest
+  static void whenSelectAllCalled_thenReturnsAllCustomers() {
+    CustomerLoader loader = new CustomerLoader();
+    
+    Test.startTest();
+    List<Customer__c> result = loader.selectAll();
+    Test.stopTest();
+    
+    System.assertEquals(3, result.size(), 'Should return all seeded customers');
+  }
+
+  @IsTest
+  static void whenSelectByIdsCalled_thenReturnsMatchingCustomers() {
+    List<Customer__c> customers = [SELECT Id FROM Customer__c LIMIT 3];
+    Set<Id> targetIds = new Set<Id>{ customers[0].Id, customers[2].Id };
+    CustomerLoader loader = new CustomerLoader();
+    
+    Test.startTest();
+    List<Customer__c> result = loader.selectByIds(targetIds);
+    Test.stopTest();
+    
+    System.assertEquals(2, result.size(), 'Should return customers by Id');
+  }
+
+  @IsTest
+  static void whenSelectByEmailCalled_thenReturnsMatchingCustomer() {
+    CustomerLoader loader = new CustomerLoader();
+    
+    Test.startTest();
+    List<Customer__c> result = loader.selectByEmail('alice@example.com');
+    Test.stopTest();
+    
+    System.assertEquals(1, result.size(), 'Should return customer by email');
+    System.assertEquals('Alice', result[0].FirstName__c, 'Should return correct customer');
+  }
+
+  @IsTest
+  static void whenSelectByEmailCalledWithNonExistentEmail_thenReturnsEmpty() {
+    CustomerLoader loader = new CustomerLoader();
+    
+    Test.startTest();
+    List<Customer__c> result = loader.selectByEmail('notfound@example.com');
+    Test.stopTest();
+    
+    System.assertEquals(0, result.size(), 'Should return empty for no match');
+  }
+
+  @IsTest
+  static void whenSelectByPhoneNormalizedCalled_thenReturnsMatchingCustomers() {
+    CustomerLoader loader = new CustomerLoader();
+    
+    Test.startTest();
+    List<Customer__c> result = loader.selectByPhoneNormalized('11234567890');
+    Test.stopTest();
+    
+    System.assertEquals(2, result.size(), 'Should return customers sharing normalized phone');
+  }
+
+  @IsTest
+  static void whenSelectByLastNameAndPhoneNormalizedCalled_thenReturnsMatchingCustomers() {
+    CustomerLoader loader = new CustomerLoader();
+    
+    Test.startTest();
+    List<Customer__c> result = loader.selectByLastNameAndPhoneNormalized('Smith', '11234567890');
+    Test.stopTest();
+    
+    System.assertEquals(2, result.size(), 'Should return customers sharing last name and phone');
+  }
+
+  @IsTest
+  static void whenSelectByPhoneNormalizedInCalled_thenReturnsMatchingCustomers() {
+    CustomerLoader loader = new CustomerLoader();
+    Set<String> phones = new Set<String>{ '11234567890', '19998887777' };
+    
+    Test.startTest();
+    List<Customer__c> result = loader.selectByPhoneNormalizedIn(phones);
+    Test.stopTest();
+    
+    System.assertEquals(3, result.size(), 'Should return all customers with matching normalized phones');
+  }
+
+  @IsTest
+  static void whenSelectByEmailInCalled_thenReturnsMatchingCustomers() {
+    CustomerLoader loader = new CustomerLoader();
+    Set<String> emails = new Set<String>{ 'alice@example.com', 'carol@example.com' };
+    
+    Test.startTest();
+    List<Customer__c> result = loader.selectByEmailIn(emails);
+    Test.stopTest();
+    
+    System.assertEquals(2, result.size(), 'Should return customers with matching emails');
+  }
+
+  @IsTest
+  static void whenSelectByLastNameInCalled_thenReturnsMatchingCustomers() {
+    CustomerLoader loader = new CustomerLoader();
+    Set<String> lastNames = new Set<String>{ 'Smith', 'Jones' };
+    
+    Test.startTest();
+    List<Customer__c> result = loader.selectByLastNameIn(lastNames);
+    Test.stopTest();
+    
+    System.assertEquals(3, result.size(), 'Should return all customers with matching last names');
   }
 }

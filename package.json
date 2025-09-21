@@ -15,7 +15,12 @@
     "prepare": "husky || true",
     "precommit": "lint-staged",
     "sfdep": "sf project deploy start --ignore-conflicts",
-    "tests:apex": "sf apex run test --result-format human --wait 60"
+    "tests:apex": "sf apex run test --result-format human --wait 60",
+    "all": "npm run scratch:create && npm run deploy:all && npm run permset:assign && npm run tests:apex && echo '\n✅ Complete setup finished! Scratch org ready with deployed code, assigned permissions, and validated tests.'",
+    "scratch:create": "sf org create scratch --definition-file config/project-scratch-def.json --duration-days 30 --set-default --wait 10 && echo '\n✅ Scratch org created successfully!'",
+    "deploy:all": "sf project deploy start --wait 10 && echo '\n✅ All metadata deployed successfully!'", 
+    "permset:assign": "sf org assign permset --name DeduplicationUser && echo '\n✅ DeduplicationUser permission set assigned to default user!'",
+    "data:generate": "sf apex run --file scripts/apex/generate_customers.apex && echo '\n✅ Test data generated successfully!'"
   },
   "devDependencies": {
     "@lwc/eslint-plugin-lwc": "^3.1.0",

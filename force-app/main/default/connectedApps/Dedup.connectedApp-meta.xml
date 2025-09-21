@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ConnectedApp xmlns="http://soap.sforce.com/2006/04/metadata">
+  <label>Dedup</label>
+  <contactEmail>c1a9r8d5@gmail.com</contactEmail>
+  <oauthConfig>
+    <callbackUrl>http://localhost:5173/oauth/callback</callbackUrl>
+    <scopes>Api</scopes>
+    <scopes>RefreshToken</scopes>
+    <scopes>OpenID</scopes>
+    <isPkceRequired>true</isPkceRequired>
+  </oauthConfig>
+</ConnectedApp>

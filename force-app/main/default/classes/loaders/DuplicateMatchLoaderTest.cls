@@ -54,7 +54,7 @@ public class DuplicateMatchLoaderTest {
         Customer_A__c = cA.Id,
         Customer_B__c = cB.Id,
         Match_Score__c = 100,
-        Status__c = 'Pending'
+        Status__c = 'Pending Review'
       );
       Duplicate_Match__c m2 = new Duplicate_Match__c(
         Customer_A__c = cB.Id,
@@ -66,7 +66,7 @@ public class DuplicateMatchLoaderTest {
         Customer_A__c = cA.Id,
         Customer_B__c = cB.Id,
         Match_Score__c = 70,
-        Status__c = 'Pending'
+        Status__c = 'Pending Review'
       );
       insert new List<Duplicate_Match__c>{ m1, m2, m3 };
       DuplicateMatchLoader loader = new DuplicateMatchLoader();

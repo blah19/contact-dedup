@@ -1,0 +1,232 @@
+openapi: 3.0.3
+info:
+  title: ShopNow Duplicate Matches API
+  version: "1.0"
+  description: REST interface for reviewing and resolving potential duplicate customers.
+servers:
+  - url: https://{instance}.my.salesforce.com/services/apexrest
+    variables:
+      instance:
+        default: your-instance
+tags:
+  - name: duplicate-matches
+paths:
+  /v1/duplicate-matches:
+    get:
+      tags: [duplicate-matches]
+      summary: List duplicate matches
+      description: Returns duplicate matches. Currently scoped to status=pending.
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [pending, merged, ignored]
+            default: pending
+          description: Filter by match status. Implementation currently supports only pending.
+        - in: query
+          name: expand
+          description: Comma-separated expansions.
+          schema:
+            type: string
+            enum: [customerA,customerB]
+          example: customerA,customerB
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/DuplicateMatch"
+              examples:
+                sample:
+                  value:
+                    items:
+                      - id: a01XXXX
+                        score: 70
+                        status: pending
+                        customerAId: a00AAAA
+                        customerBId: a00BBBB
+                        customerA:
+                          id: a00AAAA
+                          firstName: John
+                          lastName: Smith
+                          email: john.smith@example.com
+                        customerB:
+                          id: a00BBBB
+                          firstName: Jon
+                          lastName: Smith
+                          email: jon.smith@example.com
+        "400":
+          $ref: "#/components/responses/Problem400"
+  /v1/duplicate-matches/{id}:
+    get:
+      tags: [duplicate-matches]
+      summary: Get a duplicate match
+      parameters:
+        - $ref: "#/components/parameters/MatchId"
+        - in: query
+          name: expand
+          description: Comma-separated expansions.
+          schema:
+            type: string
+            enum: [customerA,customerB]
+          example: customerA,customerB
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DuplicateMatch"
+        "400":
+          $ref: "#/components/responses/Problem400"
+        "404":
+          $ref: "#/components/responses/Problem404"
+    patch:
+      tags: [duplicate-matches]
+      summary: Update match status
+      description: Set status to merged or ignored.
+      parameters:
+        - $ref: "#/components/parameters/MatchId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchStatusRequest"
+            examples:
+              merge:
+                value: { status: merged }
+              ignore:
+                value: { status: ignored }
+      responses:
+        "204":
+          description: No Content
+        "400":
+          $ref: "#/components/responses/Problem400"
+        "404":
+          $ref: "#/components/responses/Problem404"
+        "409":
+          $ref: "#/components/responses/Problem409"
+components:
+  parameters:
+    MatchId:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+      description: Duplicate_Match__c record Id.
+  schemas:
+    DuplicateMatch:
+      type: object
+      required: [id, score, status, customerAId, customerBId]
+      properties:
+        id:
+          type: string
+          description: Duplicate_Match__c Id
+        score:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 100
+        status:
+          type: string
+          enum: [pending, merged, ignored]
+        customerAId:
+          type: string
+        customerBId:
+          type: string
+        customerA:
+          $ref: "#/components/schemas/Customer"
+        customerB:
+          $ref: "#/components/schemas/Customer"
+    Customer:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: string
+        firstName:
+          type: string
+          nullable: true
+        lastName:
+          type: string
+          nullable: true
+        email:
+          type: string
+          nullable: true
+    PatchStatusRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [merged, ignored]
+  responses:
+    Problem400:
+      description: Bad Request
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+          examples:
+            invalidStatus:
+              value:
+                type: about:blank
+                title: Bad Request
+                status: 400
+                detail: Invalid status value
+    Problem404:
+      description: Not Found
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+          examples:
+            notFound:
+              value:
+                type: about:blank
+                title: Not Found
+                status: 404
+                detail: Duplicate match not found
+    Problem409:
+      description: Conflict
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+          examples:
+            conflict:
+              value:
+                type: about:blank
+                title: Conflict
+                status: 409
+                detail: Failed to update status
+  securitySchemes:
+    OAuth2Bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Problem:
+      type: object
+      required: [title, status]
+      properties:
+        type:
+          type: string
+          default: about:blank
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+security:
+  - OAuth2Bearer: []
